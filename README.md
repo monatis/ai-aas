@@ -21,6 +21,16 @@ Ideally, this project should be:
 - easily expandable with new models.
 - usable for batch and/or online prediction.
 
+## How to use
+This project makes use of [Docker Compose Profiles](https://docs.docker.com/compose/profiles/) to support optional enablement of services, so you need to have Docker engine V20.10.5 (or above) installed.
+
+```bash
+git clone https://github.com/monatis/ai-aas.git
+cd ai-aas
+export COMPOSE_PROFILES=zsl,oid
+docker-compose up -d
+```
+
 ## Plan of Attack
 - Identify a few suitable models for the initial release.
 - Identify the minimum dependencies (TensorFlow, FastAPI, Redis, Traefik and possibly a few more).
@@ -30,6 +40,6 @@ Ideally, this project should be:
 - Implement unified and reusable preprocessing components.
 - Implement prediction workers.
 - Use other great services such as TF Hub as much as possible.
-- Make it configurable.
+- Make it configurable thanks to docker-compose profiles.
 - Make it optimized.
 - Power great projects that need production-grade AI/ML services!

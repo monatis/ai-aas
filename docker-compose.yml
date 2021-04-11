@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+    api:
+        build: ./app
+        ports:
+            - "8000:80"
+
+    zsl:
+        build: ./zsl
+        profiles:
+            - zsl
+
+    redis:
+        image: redis
+        volumes:
+            - /etc/data/redis:/data
+        command: redis-server --apendonly
