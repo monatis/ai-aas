@@ -4,9 +4,6 @@ import json
 import time
 import numpy as np
 import logging
-from googletrans import Translator
-from recurrent.event_parser import RecurringEvent
-import datetime
 
 # Softmax activation function to smoothe cosine similarities for zero shot classification
 def softmax(X, theta = 1.0, axis = None):
@@ -87,13 +84,5 @@ def run_zsl():
 if __name__ == "__main__":
     model = SentenceTransformer("/bert-base-turkish-cased-nli-mean-tokens")
     queue = redis.StrictRedis(host="redis")
-    translator = Translator()
-    s = "1 Ocak 2010'dan 25 Aralık 2020'ye kadar her ayın 4'ünde canlı yayın yapmayı hatırlat"
-    t = translator.translate(s, dest='en')
-    r = RecurringEvent(now_date=datetime.datetime.now())
-    d = r.parse(str(t.text))
-    rd = r.format(d)
-    td = translator.translate(rd, dest='tr').text
-    logging.warning(f"{d} : {rd} : {td}")
 
     run_zsl()

@@ -2,5 +2,3 @@ redis
 torch
 torchvision
 sentence-transformers
-recurrent
-googletrans
