@@ -4,10 +4,6 @@ RUN apk update && apk --no-cache add python3 python3-dev py3-pip && pip3 install
 COPY requirements.txt /
 RUN pip3 install --no-cache-dir -r /requirements.txt
 
-#copy graph.pbtxt /
-#COPY detector.pb /
-#COPY labels_boxable.csv /
 COPY ./ /app
 ENV LC_ALL C.UTF-8
 ENV  LANG C.UTF-8
-ENV PYTHONPATH=/usr/lib/python3.8/site-packages
