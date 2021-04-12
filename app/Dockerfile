@@ -1,6 +1,6 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-alpine3.10
 
-RUN apt update && apt install -y python3 python3-pip libsm6 libxext6 libxrender-dev libgl1-mesa-glx
+RUN apk update && apk --no-cache add python3 py3-pip && pip3 install --upgrade pip
 #copy graph.pbtxt /
 #COPY detector.pb /
 #COPY labels_boxable.csv /

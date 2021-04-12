@@ -1,7 +1,7 @@
 import time
 
-import cv2
-import imutils
+#import cv2
+#import imutils
 import numpy as np
 from fastapi import Depends, FastAPI, HTTPException
 from starlette.requests import Request

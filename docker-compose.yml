@@ -9,6 +9,7 @@ services:
     zsl:
         build: ./zsl
         profiles:
+            - all
             - zsl
 
     redis:
