@@ -13,7 +13,7 @@ class ImageSchema(BaseModel):
     @validator('type')
     def is_valid_image_type(cls, v):
         if v not in ["url", "b64"]:
-            raise ValueError("must be one of 'url' or 'base64Image'")
+            raise ValueError("must be one of 'url' or 'b64'")
         return v
 
     @validator('data')

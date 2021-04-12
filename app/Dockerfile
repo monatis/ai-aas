@@ -1,11 +1,13 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-alpine3.10
 
-RUN apk update && apk --no-cache add python3 py3-pip && pip3 install --upgrade pip
+RUN apk update && apk --no-cache add python3 python3-dev py3-pip && pip3 install --upgrade pip && apk --no-cache add py3-numpy lapack
+COPY requirements.txt /
+RUN pip3 install --no-cache-dir -r /requirements.txt
+
 #copy graph.pbtxt /
 #COPY detector.pb /
 #COPY labels_boxable.csv /
-COPY requirements.txt /
-RUN pip3 install --no-cache-dir -r /requirements.txt
 COPY ./ /app
 ENV LC_ALL C.UTF-8
 ENV  LANG C.UTF-8
+ENV PYTHONPATH=/usr/lib/python3.8/site-packages

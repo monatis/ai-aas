@@ -1,19 +1,15 @@
 import time
 
-#import cv2
-#import imutils
-import numpy as np
 from fastapi import Depends, FastAPI, HTTPException
 from starlette.requests import Request
 import redis
 import uuid
 import json
-from schemas import (DetectedObject, ImageMetaData,
+from schemas import (ImageSchema, DetectedObject, ImageMetaData,
                      ObjectDetectionAPIDescription, ObjectDetectionResponse, ZSLTextInput)
-from utils import get_image, load_model_and_labels
+
 import logging
 queue = redis.StrictRedis(host="redis")
-object_detection_model, labels = load_model_and_labels()
 
 app = FastAPI(
     title="Intelligence as a Service",
@@ -29,37 +25,24 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
+
+@app.get("/")
+def get_status_version():
+    return {"status": "ok", "version": "0.0.1-alpha", "author": "M. Yusuf Sarıgöz", "license": "Apache 2.0"}
+
+
 @app.get("/detect/objects", response_model=ObjectDetectionAPIDescription)
 def describe_object_detection_api():
     return ObjectDetectionAPIDescription()
 
 
 @app.post("/detect/objects", response_model=ObjectDetectionResponse)
-def detect_objects(img: np.ndarray = Depends(get_image)):
+def detect_objects(img: ImageSchema):
     """
     Post an image URL or base64 encoding of an image,
     get a list of detected objects.
     """
-    h, w = img.shape[:2] # Save original height and width
-    metadata = ImageMetaData(width=w, height=h)
-    img_small = imutils.resize(img, width=500) # Resize image to reduce compute time
-    blob = cv2.dnn.blobFromImage(img_small, size=(300, 300), swapRB=True, crop=False) # Our object detection model expects an image of size 300x300
-    object_detection_model.setInput(blob) # Set image to our model
-    preds = object_detection_model.forward() # Get predictions from our model
-
-    detections = [] # Initialize an empty list to append individual predictions to
-    for detection in preds[0, 0, :, :]:
-        score = float(detection[2])
-        if score > 0.3: # this confidence threshold will be configured with  API request
-            label = labels[int(detection[1])-1] # Get te he human-readable label of the detected object
-            left = max(int(detection[3] * w), 0) # Get the bounding boxes of the detected object
-            top = max(int(detection[4] * h), 0)
-            right = min(int(detection[5] * w), w)
-            bottom = min(int(detection[6] * h), h)
-            detection = DetectedObject(label=label, score=score, top=top, right=right, bottom=bottom, left=left)
-            detections.append(detection)
-    return ObjectDetectionResponse(metadata=metadata, detections=detections)
-
+    return []
 
 
 @app.post('/classify/text')
