@@ -84,5 +84,6 @@ def run_zsl():
 if __name__ == "__main__":
     model = SentenceTransformer("/bert-base-turkish-cased-nli-mean-tokens")
     queue = redis.StrictRedis(host="redis")
+    logging.warn("Connected to Redis")
 
     run_zsl()

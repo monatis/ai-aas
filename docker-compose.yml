@@ -13,7 +13,7 @@ services:
             - zsl
 
     redis:
-        image: redis
+        image: redis:5.0.12-alpine
         volumes:
             - /etc/data/redis:/data
-        command: redis-server --apendonly
+        #command: redis-server --apendonly
