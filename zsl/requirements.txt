@@ -1,4 +1,1 @@
 redis
-torch
-torchvision
-sentence-transformers

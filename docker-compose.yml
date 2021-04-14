@@ -2,15 +2,18 @@ version: '3.9'
 
 services:
     api:
+        image: ailabscomtr/ai-aas-api
         build: ./app
         ports:
             - "8000:80"
 
     zsl:
+        image: ailabscomtr/zsl
         build: ./zsl
         profiles:
             - all
             - zsl
+            - turkish
 
     redis:
         image: redis:5.0.12-alpine

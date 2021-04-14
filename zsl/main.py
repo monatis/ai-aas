@@ -77,7 +77,7 @@ def run_zsl():
 
             queue.set(r["id"], json.dumps(results))
 
-        time.sleep(0.2)
+        time.sleep(0.1)
 
 
 
