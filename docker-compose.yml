@@ -15,6 +15,14 @@ services:
             - zsl
             - turkish
 
+    qaqg:
+        image: ailabscomtr/ai-aas-qaqg
+        build: ./qaqg
+        profiles:
+            - all
+            - qaqg
+            - turkish
+
     redis:
         image: redis:5.0.12-alpine
         volumes:
