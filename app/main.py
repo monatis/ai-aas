@@ -6,7 +6,8 @@ import redis
 import uuid
 import json
 from schemas import (ImageSchema, DetectedObject, ImageMetaData,
-                     ObjectDetectionAPIDescription, ObjectDetectionResponse, ZSLTextInput)
+                     ObjectDetectionAPIDescription, ObjectDetectionResponse, ZSLTextInput, SingleTextInput,
+                     QAInput)
 
 import logging
 queue = redis.StrictRedis(host="redis")
@@ -31,21 +32,7 @@ def get_status_version():
     return {"status": "ok", "version": "0.0.1-alpha", "author": "M. Yusuf Sarıgöz", "license": "Apache 2.0"}
 
 
-@app.get("/detect/objects", response_model=ObjectDetectionAPIDescription)
-def describe_object_detection_api():
-    return ObjectDetectionAPIDescription()
-
-
-@app.post("/detect/objects", response_model=ObjectDetectionResponse)
-def detect_objects(img: ImageSchema):
-    """
-    Post an image URL or base64 encoding of an image,
-    get a list of detected objects.
-    """
-    return []
-
-
-@app.post('/classify/text')
+@app.post('/text/classification')
 async def classify_text(zsl_input: ZSLTextInput):
     """
     Post a list of texts with a list of possible labels
@@ -64,9 +51,89 @@ async def classify_text(zsl_input: ZSLTextInput):
             resp["predictions"] = json.loads(output)
             queue.delete(k)
             break
+        time.sleep(0.08)
+        resp["success"] = True
+    else:
+        raise HTTPException(status_code=400, detail=f"Request failed after {max_tries} tries")
+
+    return resp
+
+    
+@app.post('/text/summarization')
+async def summarize_text(ats_input: SingleTextInput):
+    """
+    Post a long text, and get an abstractive textual summary.
+    """
+    resp = {"success": False}
+    k = str(uuid.uuid4())
+    ats_input = ats_input.dict()
+    ats_input["id"] = k
+    queue.rpush("ats", json.dumps(ats_input))
+    num_tries, max_tries = 0, 100
+    while num_tries < max_tries:
+        num_tries += 1
+        output = queue.get(k)
+        if output is not None:
+            resp["predictions"] = json.loads(output)
+            queue.delete(k)
+            break
         time.sleep(0.1)
         resp["success"] = True
     else:
         raise HTTPException(status_code=400, detail=f"Request failed after {max_tries} tries")
 
     return resp
+
+    
+@app.post('/text/qg')
+async def generate_questions(qg_input: SingleTextInput):
+    """
+    Post a long text, and get a set of questions ans their answers.
+    """
+    resp = {"success": False}
+    k = str(uuid.uuid4())
+    qg_input = qg_input.dict()
+    qg_input["id"] = k
+    queue.rpush("qaqg", json.dumps(qg_input))
+    num_tries, max_tries = 0, 200
+    while num_tries < max_tries:
+        num_tries += 1
+        output = queue.get(k)
+        if output is not None:
+            resp["predictions"] = json.loads(output)
+            queue.delete(k)
+            break
+        time.sleep(0.2)
+        resp["success"] = True
+    else:
+        raise HTTPException(status_code=400, detail=f"Request failed after {max_tries} tries")
+
+    return resp    
+
+
+@app.post('/text/qa')
+async def answer_question(qa_input: QAInput):
+    """
+    Post a long text and a question, and get an extractive answer.
+    """
+    resp = {"success": False}
+    k = str(uuid.uuid4())
+    qa_input = qa_input.dict()
+    qa_input["id"] = k
+    queue.rpush("qaqg", json.dumps(qa_input))
+    num_tries, max_tries = 0, 100
+    while num_tries < max_tries:
+        num_tries += 1
+        output = queue.get(k)
+        if output is not None:
+            resp["predictions"] = json.loads(output)
+            queue.delete(k)
+            break
+        time.sleep(0.1)
+        resp["success"] = True
+    else:
+        raise HTTPException(status_code=400, detail=f"Request failed after {max_tries} tries")
+
+    return resp
+
+    

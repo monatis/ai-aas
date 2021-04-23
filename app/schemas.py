@@ -72,3 +72,21 @@ class ZSLTextInput(BaseModel):
 
     class Config:
         extra = Extra.forbid
+
+    
+class SingleTextInput(BaseModel):
+    """
+    Input with a single field called text for general purpose NLP.
+    """
+    text: str = Field(..., title="Text", description="Text to be processed")
+    
+    class Config:
+        extra = Extra.forbid
+
+        
+class QAInput(SingleTextInput):
+    """
+    Input for question answering model with a context and a question.
+    """
+    question: str = Field(..., title="Question", description="Question to be answered")
+    

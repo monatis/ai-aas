@@ -23,6 +23,14 @@ services:
             - qaqg
             - turkish
 
+    ats:
+        image: ailabscomtr/ai-aas-ats
+        build: ./ats
+        profiles:
+            - all
+            - ats
+            - turkish
+
     redis:
         image: redis:5.0.12-alpine
         volumes:
