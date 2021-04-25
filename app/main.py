@@ -136,4 +136,29 @@ async def answer_question(qa_input: QAInput):
 
     return resp
 
-    
+        
+@app.post('/text/ner')
+async def recognize_named_entities(ner_input: SingleTextInput):
+    """
+    Post a text, and get a set of named entities.
+    """
+    resp = {"success": False}
+    k = str(uuid.uuid4())
+    ner_input = ner_input.dict()
+    ner_input["id"] = k
+    queue.rpush("ner", json.dumps(ner_input))
+    num_tries, max_tries = 0, 20
+    while num_tries < max_tries:
+        num_tries += 1
+        output = queue.get(k)
+        if output is not None:
+            resp["predictions"] = json.loads(output)
+            queue.delete(k)
+            break
+        time.sleep(0.08)
+        resp["success"] = True
+    else:
+        raise HTTPException(status_code=400, detail=f"Request failed after {max_tries} tries")
+
+    return resp    
+

@@ -31,6 +31,14 @@ services:
             - ats
             - turkish
 
+    ner:
+        image: ailabscomtr/ai-aas-ner
+        build: ./ner
+        profiles:
+            - all
+            - ner
+            - turkish
+
     redis:
         image: redis:5.0.12-alpine
         volumes:
