@@ -7,6 +7,20 @@ services:
         ports:
             - "8000:80"
 
+    redis:
+        image: redis:5.0.12-alpine
+        volumes:
+            - ai-aas-redis-data:/data
+        #command: redis-server --apendonly
+        
+    milvus:
+        image: milvusdb/milvus:1.1.0-cpu-d050721-5e559c
+        volumes:
+            - ai-aas-milvus-db:/var/lib/milvus/db
+            - ./milvus-conf:/var/lib/milvus/conf
+            - ai-aas-milvus-logs:/var/lib/milvus/logs
+            - ai-aas-milvus-wal:/var/lib/milvus/wal
+
     zsl:
         image: ailabscomtr/zsl
         build: ./zsl
@@ -39,8 +53,11 @@ services:
             - ner
             - turkish
 
-    redis:
-        image: redis:5.0.12-alpine
-        volumes:
-            - /etc/data/redis:/data
-        #command: redis-server --apendonly
+
+volumes:
+    ai-aas-redis-data:
+    ai-aas-milvus-db:
+    ai-aas-milvus-logs:
+    ai-aas-milvus-wal:
+
+       

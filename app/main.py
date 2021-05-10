@@ -28,7 +28,7 @@ async def add_process_time_header(request: Request, call_next):
 
 
 @app.get("/")
-def get_status_version():
+async def get_status_version():
     return {"status": "ok", "version": "0.0.1-alpha", "author": "M. Yusuf Sarıgöz", "license": "Apache 2.0"}
 
 

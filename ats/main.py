@@ -20,7 +20,7 @@ def generate_summary(main_news):
       num_beams=2,
       max_length=96,
       repetition_penalty=2.5,
-      length_penalty=2.0,
+      length_penalty=2.5,
       early_stopping=True,
       use_cache=True
   )
@@ -41,7 +41,7 @@ def run_ats():
         for r in requests:
             start = time.time()
             r = json.loads(r)
-            results = {"text": r["text"], "summary": generate_summary(r["text"])}
+            results = {"summary": generate_summary(r["text"])}
 
             queue.set(r["id"], json.dumps(results))
             logging.warning(f"{r['id']} processed in {time.time() - start}")

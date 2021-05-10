@@ -1,10 +1,10 @@
+
 #import cv2
 import numpy as np
 from fastapi import Depends
 import base64
 from schemas import ImageSchema
 from urllib import request
-
 
 def load_model_and_labels():
     """

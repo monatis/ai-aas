@@ -1,6 +1,5 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-alpine3.10
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim
 
-RUN apk update && apk --no-cache add python3 python3-dev py3-pip && pip3 install --upgrade pip && apk --no-cache add py3-numpy lapack
 COPY requirements.txt /
 RUN pip3 install --no-cache-dir -r /requirements.txt
 
