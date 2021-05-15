@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
-import redis
-import json
-import time
+import aioredis
+import asyncio
+import ujson
 import numpy as np
 import logging
 
@@ -50,20 +50,21 @@ def softmax(X, theta = 1.0, axis = None):
     return p
 
 
-def run_zsl():
-    logging.warning("Pulling started...")
+async def zsl():
+    model = SentenceTransformer("/bert-base-turkish-cased-nli-mean-tokens")
+    queue = await aioredis.create_redis("redis://redis")
+    logging.warning("Connected to Redis")
+    
+    logging.warning("ZSL task is running asynchronously...")
     while True:
-        with queue.pipeline() as pipe:
-            pipe.lrange("zsl", 0, 7)
-            pipe.ltrim("zsl", 8, -1)
-            requests, _ = pipe.execute()
-
-
+        pipe = queue.pipeline()
+        pipe.lrange("zsl", 0, 7)
+        pipe.ltrim("zsl", 8, -1)
+        requests, _ = await pipe.execute()
+        
         for r in requests:
-            logging.warning(f"Processing: {r}")
-            r = json.loads(r)
+            r = ujson.loads(r)
             embeddings = model.encode(r["texts"] + r["labels"], show_progress_bar=False)
-            logging.warning(f"embeddings: {len(embeddings)}")
             label_embeddings = embeddings[len(r["texts"]):]
             results = []
             for i in range(len(r["texts"])):
@@ -75,15 +76,10 @@ def run_zsl():
                 idx = np.argmax(dists)
                 results.append({'text': r["texts"][i], 'label': r["labels"][idx], 'score': float(dists[idx])})
 
-            queue.set(r["id"], json.dumps(results))
+            await queue.set(r["id"], ujson.dumps(results))
 
-        time.sleep(0.1)
-
+        await asyncio.sleep(0.1)
 
 
 if __name__ == "__main__":
-    model = SentenceTransformer("/bert-base-turkish-cased-nli-mean-tokens")
-    queue = redis.StrictRedis(host="redis")
-    logging.warn("Connected to Redis")
-
-    run_zsl()
+    asyncio.run(zsl())

@@ -5,12 +5,14 @@ from starlette.requests import Request
 import redis
 import uuid
 import json
-from schemas import (ImageSchema, DetectedObject, ImageMetaData,
-                     ObjectDetectionAPIDescription, ObjectDetectionResponse, ZSLTextInput, SingleTextInput,
+from schemas import (ZSLTextInput, SingleTextInput,
                      QAInput)
 
 import logging
 queue = redis.StrictRedis(host="redis")
+from qdrant_client import QdrantClient
+qdrant = QdrantClient(host="qdrant", port=6333)
+logging.warning("Connected to qdrant")
 
 app = FastAPI(
     title="Intelligence as a Service",
@@ -88,14 +90,14 @@ async def summarize_text(ats_input: SingleTextInput):
 @app.post('/text/qg')
 async def generate_questions(qg_input: SingleTextInput):
     """
-    Post a long text, and get a set of questions ans their answers.
+    Post a long text, and get a set of questions and their answers.
     """
     resp = {"success": False}
     k = str(uuid.uuid4())
     qg_input = qg_input.dict()
     qg_input["id"] = k
     queue.rpush("qaqg", json.dumps(qg_input))
-    num_tries, max_tries = 0, 200
+    num_tries, max_tries = 0, 300
     while num_tries < max_tries:
         num_tries += 1
         output = queue.get(k)

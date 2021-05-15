@@ -1,2 +1,2 @@
 redis
-pymilvus
+qdrant-client

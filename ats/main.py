@@ -17,10 +17,10 @@ def generate_summary(main_news):
   generated_ids=model.generate(
       input_ids=source_encoding["input_ids"],
       attention_mask=source_encoding["attention_mask"],
-      num_beams=2,
-      max_length=96,
+      num_beams=3,
+      max_length=120,
       repetition_penalty=2.5,
-      length_penalty=2.5,
+      length_penalty=2.0,
       early_stopping=True,
       use_cache=True
   )
