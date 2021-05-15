@@ -50,9 +50,9 @@ def softmax(X, theta = 1.0, axis = None):
     return p
 
 
-async def zsl():
+async def task():
     model = SentenceTransformer("/bert-base-turkish-cased-nli-mean-tokens")
-    queue = await aioredis.create_redis("redis://redis")
+    queue = await aioredis.create_redis("redis://redis:6379/0?encoding=utf-8")
     logging.warning("Connected to Redis")
     
     logging.warning("ZSL task is running asynchronously...")
@@ -82,4 +82,4 @@ async def zsl():
 
 
 if __name__ == "__main__":
-    asyncio.run(zsl())
+    asyncio.run(task())
