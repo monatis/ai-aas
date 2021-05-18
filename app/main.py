@@ -10,7 +10,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from qdrant_client import QdrantClient
 from starlette.requests import Request
 
-from schemas import QAInput, SingleTextInput, ZSLTextInput
+from schemas import QAInput, SingleTextInput, ZSLTextInput, ZSLResponse
 
 app = FastAPI(
     title="Intelligence as a Service",
@@ -48,7 +48,7 @@ async def get_status_version():
     return {"status": "ok", "version": "0.0.1-alpha", "author": "M. Yusuf Sarıgöz", "license": "Apache 2.0"}
 
 
-@app.post('/text/classification')
+@app.post('/text/classification', response_model=ZSLResponse)
 async def classify_text(zsl_input: ZSLTextInput):
     """
     Post a list of texts with a list of possible labels
@@ -73,7 +73,7 @@ async def classify_text(zsl_input: ZSLTextInput):
             status_code=408, detail="Request timed out after waiting for 3 seconds")
 
     resp["success"] = True
-    return resp
+    return ZSLResponse(**resp)
 
 
 @app.post('/text/summarization')

@@ -27,9 +27,22 @@ This project makes use of [Docker Compose Profiles](https://docs.docker.com/comp
 ```bash
 git clone https://github.com/monatis/ai-aas.git
 cd ai-aas
-export COMPOSE_PROFILES=zsl,oid
+export COMPOSE_PROFILES=zsl,ner
 docker-compose up -d
 ```
+
+## Current supported tasks
+- Zero-shot text classification
+- Named entity recognition
+- Question answering
+- Question paraphrasing
+- Question generation (?)
+- Abstractive summarization
+
+**Very soon**
+- Text clustering
+- Scalable semantic search
+- And more
 
 ## Plan of Attack
 - Identify a few suitable models for the initial release.

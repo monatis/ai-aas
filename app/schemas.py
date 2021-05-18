@@ -78,7 +78,7 @@ class SingleTextInput(BaseModel):
     """
     Input with a single field called text for general purpose NLP.
     """
-    text: str = Field(..., title="Text", description="Text to be processed")
+    text: str = Field(..., title="Text", description="Input text to be processed by this endpoint")
     
     class Config:
         extra = Extra.forbid
@@ -90,3 +90,14 @@ class QAInput(SingleTextInput):
     """
     question: str = Field(..., title="Question", description="Question to be answered")
     
+class ZSLPrediction(SingleTextInput):
+    """
+    Single ZSL prediction.
+    """
+    label: str = Field(..., title="Label", description="Label predicted for this input")
+    score: float = Field(..., title="Score", description="Confidence score for this label between 0 and 1")
+    
+
+class ZSLResponse(BaseModel):
+    success: bool = Field(..., title="Success", description="A flag indicating the request could be processed successfully or not")
+    predictions: List[ZSLPrediction] = Field(..., title="Predictions", description="List of predictions")
