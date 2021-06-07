@@ -1,6 +1,9 @@
 # ai-aas
 AI as a Service. Production is all you need
 
+## Acknowledgement
+Google supported this work by providing Google Cloud credit. Thank you Google for supporting the open source! 🎉
+
 ## Overview
 In this project, I aim at developing an embarrassingly simple, production ready AI as a Service.
 
