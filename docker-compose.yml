@@ -15,7 +15,7 @@ services:
     qdrant:
         image: generall/qdrant:latest
         volumes:
-            - ai-aas-qdrant-storage:/qdrant/storage
+            - ai-aas-qdrant-data:/qdrant/storage
         ports:
             - "6333:6333"
 
@@ -54,4 +54,4 @@ services:
 
 volumes:
     ai-aas-redis-data:
-    ai-aas-qdrant-storage:
+    ai-aas-qdrant-data:

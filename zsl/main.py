@@ -73,8 +73,7 @@ async def task():
                     dists.append(np.inner(embeddings[i], label_embeddings[j]))
 
                 dists = softmax(np.array(dists))
-                idx = np.argmax(dists)
-                results.append({'text': r["texts"][i], 'label': r["labels"][idx], 'score': float(dists[idx])})
+                results.append({'text': r["texts"][i], 'results': [{'label': label, 'score': f'{float(dist):.2f}'} for label, dist in zip(r['labels'], dists)]})
 
             await queue.set(r["id"], ujson.dumps(results))
 
@@ -82,4 +81,5 @@ async def task():
 
 
 if __name__ == "__main__":
+    logging.warning("ZSL started")
     asyncio.run(task())

@@ -83,6 +83,12 @@ class SingleTextInput(BaseModel):
     class Config:
         extra = Extra.forbid
 
+
+class Prediction(BaseModel):
+    """General purpose prediction result with fields of a label and a score"""
+    label: str = Field(..., title="Label", description="Label predicted for this input")
+    score: str = Field(..., title="Score", description="Confidence score for this label between 0 and 1")
+
         
 class QAInput(SingleTextInput):
     """
@@ -90,14 +96,15 @@ class QAInput(SingleTextInput):
     """
     question: str = Field(..., title="Question", description="Question to be answered")
     
+    
 class ZSLPrediction(SingleTextInput):
     """
     Single ZSL prediction.
     """
-    label: str = Field(..., title="Label", description="Label predicted for this input")
-    score: float = Field(..., title="Score", description="Confidence score for this label between 0 and 1")
+    results: List[Prediction] = Field(..., title="Prediction results", description="List of prediction results with a label and a score")
     
 
 class ZSLResponse(BaseModel):
+    """Response to be returned to a successful ZAL request"""
     success: bool = Field(..., title="Success", description="A flag indicating the request could be processed successfully or not")
     predictions: List[ZSLPrediction] = Field(..., title="Predictions", description="List of predictions")
