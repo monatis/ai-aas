@@ -1,61 +1,42 @@
-from sentence_transformers import SentenceTransformer
-import aioredis
 import asyncio
-import ujson
-import numpy as np
 import logging
 
-# Softmax activation function to smoothe cosine similarities for zero shot classification
-def softmax(X, theta = 1.0, axis = None):
-    """
-    Compute the softmax of each element along an axis of X.
+import aioredis
+import numpy as np
+import tensorflow as tf
+import ujson
+from transformers import AutoTokenizer, TFAutoModel
 
-    Parameters
-    ----------
-    X: ND-Array. Probably should be floats.
-    theta (optional): float parameter, used as a multiplier
-        prior to exponentiation. Default = 1.0
-    axis (optional): axis to compute values along. Default is the
-        first non-singleton axis.
+#model_name = 'mys/bert-base-turkish-cased-nli-mean'
+model_name = 'mys/bert-base-turkish-cased-nli-mean'
 
-    Returns an array the same size as X. The result will sum to 1
-    along the specified axis.
-    """
 
-    # make X at least 2d
-    y = np.atleast_2d(X)
+def label_text(model, tokenizer, texts, labels):
+    texts_length = len(texts)
+    tokens = tokenizer(texts + labels, padding=True, return_tensors='tf')
+    embs = model(**tokens)[0]
 
-    # find axis
-    if axis is None:
-        axis = next(j[0] for j in enumerate(y.shape) if j[1] > 1)
+    attention_masks = tf.cast(tokens['attention_mask'], tf.float32)
+    sample_length = tf.reduce_sum(attention_masks, axis=-1, keepdims=True)
+    masked_embs = embs * tf.expand_dims(attention_masks, axis=-1)
+    masked_embs = tf.reduce_sum(masked_embs, axis=1) / tf.cast(sample_length, tf.float32)
 
-    # multiply y against the theta parameter,
-    y = y * float(theta)
-
-    # subtract the max for numerical stability
-    y = y - np.expand_dims(np.max(y, axis = axis), axis)
-
-    # exponentiate y
-    y = np.exp(y)
-
-    # take the sum along the specified axis
-    ax_sum = np.expand_dims(np.sum(y, axis = axis), axis)
-
-    # finally: divide elementwise
-    p = y / ax_sum
-
-    # flatten if X was 1D
-    if len(X.shape) == 1: p = p.flatten()
-
-    return p
+    dists = tf.experimental.numpy.inner(masked_embs[:texts_length], masked_embs[texts_length:])
+    scores = tf.nn.softmax(dists)
+    results = list(zip(labels, scores.numpy().squeeze().tolist()))
+    sorted_results = sorted(results, key=lambda x: x[1], reverse=True)
+    sorted_results = [{"label": label, "score": f"{score:.4f}"} for label, score in sorted_results]
+    return sorted_results
 
 
 async def task():
-    model = SentenceTransformer("/bert-base-turkish-cased-nli-mean-tokens")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = TFAutoModel.from_pretrained(model_name)
+
     queue = await aioredis.create_redis("redis://redis:6379/0?encoding=utf-8")
     logging.warning("Connected to Redis")
-    
     logging.warning("ZSL task is running asynchronously...")
+    
     while True:
         pipe = queue.pipeline()
         pipe.lrange("zsl", 0, 7)
@@ -64,16 +45,11 @@ async def task():
         
         for r in requests:
             r = ujson.loads(r)
-            embeddings = model.encode(r["texts"] + r["labels"], show_progress_bar=False)
-            label_embeddings = embeddings[len(r["texts"]):]
+
             results = []
             for i in range(len(r["texts"])):
-                dists = []
-                for j in range(len(label_embeddings)):
-                    dists.append(np.inner(embeddings[i], label_embeddings[j]))
-
-                dists = softmax(np.array(dists))
-                results.append({'text': r["texts"][i], 'results': [{'label': label, 'score': f'{float(dist):.2f}'} for label, dist in zip(r['labels'], dists)]})
+                sorted_results = label_text(model, tokenizer, [r["texts"][i]], r["labels"])
+                results.append({'text': r["texts"][i], 'results': sorted_results})
 
             await queue.set(r["id"], ujson.dumps(results))
 
@@ -82,4 +58,5 @@ async def task():
 
 if __name__ == "__main__":
     logging.warning("ZSL started")
-    asyncio.run(task())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(task())
