@@ -44,7 +44,7 @@ docker-compose up -d
 
 **Very soon**
 - Text clustering
-- Scalable semantic search
+- Scalable semantic search with Qdrant
 - And more
 
 ## Plan of Attack
